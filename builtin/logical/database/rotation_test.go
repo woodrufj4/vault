@@ -21,7 +21,7 @@ import (
 	"github.com/hashicorp/vault/sdk/helper/dbtxn"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/hashicorp/vault/sdk/queue"
-	"github.com/lib/pq"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	mongodbatlasapi "github.com/mongodb/go-client-mongodb-atlas/mongodbatlas"
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -420,12 +420,8 @@ func TestBackend_StaticRole_Revoke_user(t *testing.T) {
 func createTestPGUser(t *testing.T, connURL string, username, password, query string) {
 	t.Helper()
 	log.Printf("[TRACE] Creating test user")
-	conn, err := pq.ParseURL(connURL)
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	db, err := sql.Open("postgres", conn)
+	db, err := sql.Open("pgx", connURL)
 	defer db.Close()
 	if err != nil {
 		t.Fatal(err)
@@ -457,7 +453,7 @@ func createTestPGUser(t *testing.T, connURL string, username, password, query st
 func verifyPgConn(t *testing.T, username, password, connURL string) {
 	t.Helper()
 	cURL := strings.Replace(connURL, "postgres:secret", username+":"+password, 1)
-	db, err := sql.Open("postgres", cURL)
+	db, err := sql.Open("pgx", cURL)
 	if err != nil {
 		t.Fatal(err)
 	}
