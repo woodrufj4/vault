@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -329,6 +330,9 @@ func TestServerRun(t *testing.T) {
 				templateTest.template.Destination = pointerutil.StringPtr(dstFile)
 				templatesToRender = append(templatesToRender, templateTest.template)
 			}
+			for _, t := range templatesToRender {
+				fmt.Println("DESTTTTTTTTTTTTTTTTTTT", *t.Destination)
+			}
 
 			ctx, _ := context.WithTimeout(context.Background(), 20*time.Second)
 			sc := ServerConfig{
@@ -379,13 +383,15 @@ func TestServerRun(t *testing.T) {
 
 			// verify test file exists and has the content we're looking for
 			var fileCount int
+			var errs []string
 			for _, template := range templatesToRender {
 				if template.Destination == nil {
 					t.Fatal("nil template destination")
 				}
 				content, err := os.ReadFile(*template.Destination)
 				if err != nil {
-					t.Fatal(err)
+					errs = append(errs, err.Error())
+					continue
 				}
 				fileCount++
 
@@ -397,8 +403,8 @@ func TestServerRun(t *testing.T) {
 					t.Fatalf("secret didn't match: %#v", secret)
 				}
 			}
-			if fileCount != len(templatesToRender) {
-				t.Fatalf("mismatch file to template: (%d) / (%d)", fileCount, len(templatesToRender))
+			if len(errs) != 0 {
+				t.Fatalf("Failed to find the expected files. Expected %d, got %d\n\t%s", len(templatesToRender), fileCount, strings.Join(errs, "\n\t"))
 			}
 		})
 	}
