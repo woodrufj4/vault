@@ -229,6 +229,7 @@ func TestServerRun(t *testing.T) {
 
 	testCases := map[string]struct {
 		templateMap        map[string]*templateTest
+		expectedValues     *secretRender
 		expectError        bool
 		exitOnRetryFailure bool
 	}{
@@ -318,6 +319,22 @@ func TestServerRun(t *testing.T) {
 			expectError:        true,
 			exitOnRetryFailure: true,
 		},
+		"with sprig functions": {
+			templateMap: map[string]*templateTest{
+				"render_01": {
+					template: &ctconfig.TemplateConfig{
+						Contents: pointerutil.StringPtr(templateContentsWithSprigFunctions),
+					},
+				},
+			},
+			expectedValues: &secretRender{
+				Username: "APPUSER",
+				Password: "passphrase",
+				Version:  "3",
+			},
+			expectError:        false,
+			exitOnRetryFailure: true,
+		},
 	}
 
 	for name, tc := range testCases {
@@ -393,8 +410,18 @@ func TestServerRun(t *testing.T) {
 				if err := json.Unmarshal(content, &secret); err != nil {
 					t.Fatal(err)
 				}
-				if secret.Username != "appuser" || secret.Password != "password" || secret.Version != "3" {
-					t.Fatalf("secret didn't match: %#v", secret)
+				var expectedValues secretRender
+				if tc.expectedValues != nil {
+					expectedValues = *tc.expectedValues
+				} else {
+					expectedValues = secretRender{
+						Username: "appuser",
+						Password: "password",
+						Version:  "3",
+					}
+				}
+				if secret != expectedValues {
+					t.Fatalf("secret didn't match, expected: %#v, got: %#v", expectedValues, secret)
 				}
 			}
 			if fileCount != len(templatesToRender) {
@@ -525,6 +552,16 @@ var templateContentsPermDenied = `
 {
 {{ if .Data.data.username}}"username":"{{ .Data.data.username}}",{{ end }}
 {{ if .Data.data.password }}"password":"{{ .Data.data.password }}",{{ end }}
+{{ if .Data.metadata.version}}"version":"{{ .Data.metadata.version }}"{{ end }}
+}
+{{ end }}
+`
+
+var templateContentsWithSprigFunctions = `
+{{ with secret "kv/myapp/config"}}
+{
+{{ if .Data.data.username}}"username":"{{ .Data.data.username | sprig_upper }}",{{ end }}
+{{ if .Data.data.password }}"password":"{{ .Data.data.password | sprig_replace "word" "phrase" }}",{{ end }}
 {{ if .Data.metadata.version}}"version":"{{ .Data.metadata.version }}"{{ end }}
 }
 {{ end }}
