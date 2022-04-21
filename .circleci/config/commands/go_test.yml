@@ -46,13 +46,6 @@ steps:
         *)       EXTRA_TAGS=deadlock;;
         esac
 
-        # Install CircleCI CLI
-        curl -sSL \
-            "https://github.com/CircleCI-Public/circleci-cli/releases/download/v${CIRCLECI_CLI_VERSION}/circleci-cli_${CIRCLECI_CLI_VERSION}_linux_amd64.tar.gz" \
-          | sudo tar --overwrite -xz \
-            -C /usr/local/bin \
-            "circleci-cli_${CIRCLECI_CLI_VERSION}_linux_amd64/circleci"
-
         USE_DOCKER=0
         <<# parameters.use_docker >>
         USE_DOCKER=1

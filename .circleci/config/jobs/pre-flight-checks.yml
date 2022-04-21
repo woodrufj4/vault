@@ -6,10 +6,9 @@ steps:
       GOPROXY: https://proxy.golang.org,direct
   - checkout
   - run:
-      name: Install CircleCI CLI
-      command: |
-        curl -fLSs "https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/v${CIRCLECI_CLI_VERSION}/install.sh" | bash
-        # Done, print some debug info.
+      name: Check CircleCI CLI version
+      command:
+        # Print some debug info.
         set -x
         which circleci
         circleci version
