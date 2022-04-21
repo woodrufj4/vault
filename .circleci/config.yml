@@ -144,7 +144,7 @@ jobs:
         - bin
         root: .
     environment:
-    - CIRCLECI_CLI_VERSION: 0.1.5546
+    - CIRCLECI_CLI_VERSION: 0.1.17142
     - GO_TAGS: ''
     - GO_VERSION: 1.17.9
     - GOFUMPT_VERSION: 0.2.1
@@ -382,7 +382,7 @@ jobs:
           fi
         name: make fmt
     environment:
-    - CIRCLECI_CLI_VERSION: 0.1.5546
+    - CIRCLECI_CLI_VERSION: 0.1.17142
     - GO_TAGS: ''
     - GO_VERSION: 1.17.9
     - GOFUMPT_VERSION: 0.2.1
@@ -811,22 +811,11 @@ jobs:
     - checkout
     - run:
         command: |
-          export CCI_PATH=/tmp/circleci-cli/$CIRCLECI_CLI_VERSION
-          mkdir -p $CCI_PATH
-          NAME=circleci-cli_${CIRCLECI_CLI_VERSION}_${ARCH}
-          URL=$BASE/v${CIRCLECI_CLI_VERSION}/${NAME}.tar.gz
-          curl -sSL $URL \
-            | tar --overwrite --strip-components=1 -xz -C $CCI_PATH "${NAME}/circleci"
-          # Add circleci to the path for subsequent steps.
-          echo "export PATH=$CCI_PATH:\$PATH" >> $BASH_ENV
+          curl -fLSs "https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/v${CIRCLECI_CLI_VERSION}/install.sh" | bash
           # Done, print some debug info.
           set -x
-          . $BASH_ENV
           which circleci
           circleci version
-        environment:
-          ARCH: linux_amd64
-          BASE: https://github.com/CircleCI-Public/circleci-cli/releases/download
         name: Install CircleCI CLI
     - run:
         command: make ci-verify
@@ -865,7 +854,7 @@ jobs:
         paths:
         - /home/circleci/go/pkg/mod
     environment:
-    - CIRCLECI_CLI_VERSION: 0.1.5546
+    - CIRCLECI_CLI_VERSION: 0.1.17142
     - GO_TAGS: ''
     - GO_VERSION: 1.17.9
     - GOFUMPT_VERSION: 0.2.1
