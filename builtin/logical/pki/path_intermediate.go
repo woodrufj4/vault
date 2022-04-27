@@ -51,7 +51,7 @@ func (b *backend) pathGenerateIntermediate(ctx context.Context, req *logical.Req
 		return logical.ErrorResponse("Can not create intermediate until migration has completed"), nil
 	}
 
-	exported, format, role, errorResp := b.getGenerationParams(ctx, data, req.MountPoint)
+	exported, format, role, errorResp := b.getGenerationParams(ctx, req.Storage, data, req.MountPoint)
 	if errorResp != nil {
 		return errorResp, nil
 	}
