@@ -185,7 +185,7 @@ func fetchCertBySerial(ctx context.Context, b *backend, req *logical.Request, pr
 		if err = b.crlBuilder.rebuildIfForced(ctx, b, req); err != nil {
 			return nil, err
 		}
-		path, err = resolveIssuerCRLPath(ctx, req.Storage, defaultRef)
+		path, err = resolveIssuerCRLPath(ctx, b, req.Storage, defaultRef)
 		if err != nil {
 			return nil, err
 		}
